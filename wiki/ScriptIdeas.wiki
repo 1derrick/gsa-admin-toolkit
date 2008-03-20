@@ -1,5 +1,7 @@
 = Script Ideas =
 
+Here are some ideas for scripts that would be useful for GSA administrators. If anyone has already written one of these scripts, please let me know.
+
 * Tool to validate XML responses from Authn/Authz SPI 
 
 The appliance does not provide good error messages when using the Authn/Authz SPI. For example, see Google bug #240337. We can provide appliance admins with a tool that sends a request to their Authn/Authz servers and validates the responses using xmllint.
@@ -7,3 +9,7 @@ The appliance does not provide good error messages when using the Authn/Authz SP
 * Example code for doing field-based search using the appliance
 
 You can use meta tags to do field-based search on the appliance. For example, show all database records of people who play soccer and live in London. It would be good for us to provide some sample code that GSA administrators can easily modify.
+
+* Analysis of log files
+
+Analyse a query log files to get data on number of queries per second, error rate, average response time etc.
