@@ -10,6 +10,10 @@ The appliance does not provide good error messages when using the Authn/Authz SP
 
 You can use meta tags to do field-based search on the appliance. For example, show all database records of people who play soccer and live in London. It would be good for us to provide some sample code that GSA administrators can easily modify.
 
-* Analysis of log files
+* Configuration changes
 
-Analyse a query log files to get data on number of queries per second, error rate, average response time etc.
+Export the config file and compare to a previous version to determine what config changes have been made to an appliance.
+
+* Testing environment
+
+RPM or tarball to install and startup all the scripts to configure a testing environment. Also, automatically configure an appliance to use this testing environment.
