@@ -17,3 +17,7 @@ Export the config file and compare to a previous version to determine what confi
 * Testing environment
 
 RPM or tarball to install and startup all the scripts to configure a testing environment. Also, automatically configure an appliance to use this testing environment.
+
+* Load balancer
+
+Load balancer with failover, uptime monitoring, error handling, throttling of user connections, sticky sessions, pass through of appliance IP.
