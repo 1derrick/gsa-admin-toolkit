@@ -21,7 +21,3 @@ RPM or tarball to install and startup all the scripts to configure a testing env
 * Load balancer
 
 Load balancer with failover, uptime monitoring, error handling, throttling of user connections, sticky sessions, pass through of appliance IP.
-
-* SMB crawler
-
-Miguel has written a script that crawls SMB shares using smbclient commands.
