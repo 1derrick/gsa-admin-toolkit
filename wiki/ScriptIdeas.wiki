@@ -18,6 +18,6 @@ Export the config file and compare to a previous version to determine what confi
 
 RPM or tarball to install and startup all the scripts to configure a testing environment. Also, automatically configure an appliance to use this testing environment.
 
-* Load balancer
+* Reverse proxy
 
-Load balancer with failover, uptime monitoring, error handling, throttling of user connections, sticky sessions, pass through of appliance IP.
+Reverse proxy for the appliance that handles request queueing, error handling. Can be used in conjunction with a load balancer that handles failover.
