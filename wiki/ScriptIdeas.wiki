@@ -21,3 +21,7 @@ RPM or tarball to install and startup all the scripts to configure a testing env
 * Reverse proxy
 
 Reverse proxy for the appliance that handles request queueing, error handling. Can be used in conjunction with a load balancer that handles failover.
+
+* Download URLs from Crawl Diagnostics
+
+In 5.0.4, there is no export from crawl diagnostics, but a script could be used to get all URLs.
