@@ -1,21 +1,21 @@
 #summary Using the Kerberos Setup Validation Utility
 
-= Introduction =
+== Introduction ==
 
 Diagnostics utility to help identify kerberos-related configuration/setup and serving issues for the Google Search Appliance (GSA).
 
 It is assumed the GSA Admin ran through the kerberos IWA setup for the GSA (i.e, created an account, created a DNS name, ran ktpass)
     
-= Details =
+== Details ==
 System Requirements:
  * 32-bit Windows XP, Vista, Windows 7
  * MIT Kerberos Client (http://web.mit.edu/Kerberos/dist/index.html) installed at (c:\program files\  such that  klist exists at: c:\program files\mit\kerberos\bin\klist.exe)
 
-= Download =
+== Download ==
 
 http://code.google.com/p/gsa-admin-toolkit/source/browse/trunk/gsa_win_utility.hta
 
-Usage:
+== Usage ==
  * Download the gsa_win_toolkit.hta and save it to the desktop with the extension .hta.  The users account running the script does not have to be an admin.  
  * Right click on the file, select 'Properties'.  If the security setting blocks execution, select "Unblock".  Depending on your desktop system security, you may not have to do this step.
  * On launch, enter the following
@@ -24,7 +24,7 @@ Usage:
    # Select the latest keytab
  *  The utility will run through about 20+ individual tests comparing the keytab/DNS/AD entry, etc.  Output in green is a pass, in red is an error that the tool detected in the confiuration.      
 
-=References:=
+== References ==
 
 http://code.google.com/apis/searchappliance/documentation/60/secure_search/secure_search_crwlsrv.html#kerberos_keytab
 
