@@ -10,7 +10,11 @@ It is assumed the GSA Admin ran through the kerberos IWA setup for the GSA (i.e,
 System Requirements:
  * 32-bit Windows XP, Vista, Windows 7
  * MIT Kerberos Client (http://web.mit.edu/Kerberos/dist/index.html) installed at (c:\program files\  such that  klist exists at: c:\program files\mit\kerberos\bin\klist.exe)
-         
+
+= Download =
+
+http://code.google.com/p/gsa-admin-toolkit/source/browse/trunk/gsa_win_utility.hta
+
 Usage:
  * Download the gsa_win_toolkit.hta and save it to the desktop with the extension .hta.  The users account running the script does not have to be an admin.  
  * Right click on the file, select 'Properties'.  If the security setting blocks execution, select "Unblock".  Depending on your desktop system security, you may not have to do this step.
