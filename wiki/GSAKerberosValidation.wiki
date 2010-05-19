@@ -22,7 +22,19 @@ http://code.google.com/p/gsa-admin-toolkit/source/browse/trunk/gsa_win_utility.h
    # Fully qualified DNS A-Name of the GSA (eg gsa.yourdomain.com)
    # User account for the GSA in active directory associated with the keytab.  (omit the domain information. eg: just gsauser not DOMAIN\gsauser or gsauser@DOMAIN)
    # Select the latest keytab
- *  The utility will run through about 20+ individual tests comparing the keytab/DNS/AD entry, etc.  Output in green is a pass, in red is an error that the tool detected in the confiuration.      
+ *  The utility will run through about 20+ individual tests comparing the keytab/DNS/AD entry, etc.  Output in green is a pass, in red is an error that the tool detected in the confiuration.
+
+==Error Messages ==  
+ *  On Launch, if you see "Safety settings on this computer prohibit a data source on another domain" 
+  Open Internet Explorer <br/>
+  Go to Tools -> Internet Options<br/>
+  Select the [Security] tab <br/>
+  Select [Internet] from the list of web content zone <br/>
+  Click [Custom Level] <br/>
+  Enable [Access data sources across domains] <br/>
+  Click all [OK] buttons to save and close all settings related pages <br/>
+  Try running the diagnostic tool again <br/>
+
 
 == References ==
 
