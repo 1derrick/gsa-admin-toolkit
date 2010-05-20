@@ -12,8 +12,11 @@ System Requirements:
  * MIT Kerberos Client (http://web.mit.edu/Kerberos/dist/index.html) installed at (c:\program files\  such that  klist exists at: c:\program files\mit\kerberos\bin\klist.exe)
 
 == Download ==
-
+source:
 http://code.google.com/p/gsa-admin-toolkit/source/browse/trunk/gsa_win_utility.hta
+
+download:
+http://gsa-admin-toolkit.googlecode.com/svn/trunk/gsa_win_utility.hta
 
 == Usage ==
  * Download the gsa_win_toolkit.hta and save it to the desktop with the extension .hta.  The users account running the script does not have to be an admin.  
