@@ -5,6 +5,9 @@
 Diagnostics utility to help identify kerberos-related configuration/setup and serving issues for the Google Search Appliance (GSA).
 
 It is assumed the GSA Admin ran through the kerberos IWA setup for the GSA (i.e, created an account, created a DNS name, ran ktpass)
+
+Use this script if you run into issue activating IWA on the GSA or if you get prompted by the GSA while doing a secure search.  This utility will *not* check to see if why certain secure results are not being shown (see our <a href='http://code.google.com/apis/searchappliance/kb/secure/kerberos-troubleshooting.html#step8'>Troubleshooting Guide</a>).
+
     
 == Details ==
 System Requirements:
@@ -44,5 +47,3 @@ http://gsa-admin-toolkit.googlecode.com/svn/trunk/gsa_win_utility.hta
 http://code.google.com/apis/searchappliance/documentation/60/secure_search/secure_search_crwlsrv.html#kerberos_keytab
 
 http://web.mit.edu/Kerberos/dist/index.html
-
-http://technet.microsoft.com/en-us/library/ee156506.aspx
