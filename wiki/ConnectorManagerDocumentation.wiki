@@ -61,5 +61,5 @@ python connectormanager.py --debug --connectors=url_connector.URLConnector,other
   * Create a connector instance with the new connector manager, and configure the connector appropriately.
   * Ensure that the URLs that the connector feeds into the GSA match the patterns listed in the admin console in the Crawl URLs page. Otherwise, the GSA will reject the feed provided by the connector.
 
-== The `Connector` interface ==
+= The `Connector` interface =
 The `URLConnector` above extends `TimedConnector` in order to use its scheduling scheme. However, the raw `Connector` class can be used to implement a custom scheduling scheme. It also provides a wealth of other methods essential in writing full-featured connectors.
