@@ -40,7 +40,7 @@ Here are a few things to note about this connector:
   * All connectors must have a unique `CONNECTOR_TYPE` field that identifies the particular type of connector.
   * `The CONNECTOR_CONFIG` dictionary specifies configuration fields for the connector. When the connector's configuration form is brought up in the GSA administration interface, this `CONNECTOR_CONFIG` will be used to construct the form.
   * The `init` method, which is available to all connectors, is called when the connector is created or when its configuration is modified. It's the perfect place to load and process configuration parameters.
-  * The `sendContentFeed` packages given content in content feed XML and pushes it to the GSA.
+  * The `sendContentFeed` method packages content data in an XML block that the GSA will accept. Here, the `URLConnector` sends the content as HTML to be added to the GSA's index.
 
 == Running the connector ==
 Now that we have a connector written, it's time to use the connector manager to expose this connector to the GSA.
