@@ -1,0 +1,43 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+	The Python ConnectorManager provides a simple, quick way to write connectors for the GSA.
+
+= Writing a Connector =
+== Prerequisites ==
+  * Python 2.4
+  * [http://cherrypy.org/ CherryPy 3]
+The sample files for this documentation are available in the repository.
+
+== Example ==
+Here is a very simple, intuitive connector that fetches the contents of a URL and then pushes it to the GSA as a content feed:
+
+{{{
+import timed_connector
+import urllib2
+
+class URLConnector(timed_connector.TimedConnector):
+  CONNECTOR_TYPE = 'url-connector'
+  CONNECTOR_CONFIG = {
+      'url': { 'type': 'text', 'label': 'URL to fetch' },
+      'delay': { 'type': 'text', 'label': 'Fetch delay' }
+  }
+
+  def init(self):
+    self.setInterval(int(self.getConfigParam('delay')))
+
+  def run(self):
+    url = self.getConfigParam('url')
+    req = urllib2.Request(url)
+    response = urllib2.urlopen(req)
+    content = response.read()
+    self.sendContentFeed(url=url, action='add', mimetype='text/html',
+                         content=content)
+}}}
+
+Here are a few things to note about this connector:
+  * The `URLConnector` extends the `TimedConnector` class. This `TimedConnector` is a special type of connector that implements a simple scheduling scheme--when it is started, it will call its `run` method periodically, with a delay interval specified by the `setInterval` method.
+  * All connectors must have a unique `CONNECTOR_TYPE` field that identifies the particular type of connector.
+  * `The CONNECTOR_CONFIG` dictionary specifies configuration fields for the connector. When the connector's configuration form is brought up in the GSA administration interface, this `CONNECTOR_CONFIG` will be used to construct the form.
+  * The `init` method, which is available to all connectors, is called when the connector is created or when its configuration is modified. It's the perfect place to load and process configuration parameters.
+  * The `sendContentFeed` packages given content in content feed XML and pushes it to the GSA.
