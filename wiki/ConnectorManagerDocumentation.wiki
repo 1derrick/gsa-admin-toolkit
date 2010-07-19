@@ -56,7 +56,7 @@ python connectormanager.py --debug --connectors=url_connector.URLConnector
 python connectormanager.py --debug --connectors=url_connector.URLConnector,other_connector.OtherConnector
 }}}
 
-  (For the purposes of the rest of this session, suppose that this script is running on the host `myconnector.mydomain.com`).
+  (For the purposes of the rest of this section, suppose that this script is running on the host `myconnector.mydomain.com`).
   * Next, open the GSA administration console. Create a new connector manager and set the host to `http://myconnector.mydomain.com:38080` (note: no '/' at the end).
   * Create a connector instance with the new connector manager, and configure the connector appropriately.
   * Ensure that the URLs that the connector feeds into the GSA match the patterns listed in the admin console in the Crawl URLs page. Otherwise, the GSA will reject the feed provided by the connector.
