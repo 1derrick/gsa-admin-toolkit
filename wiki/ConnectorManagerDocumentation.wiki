@@ -63,3 +63,52 @@ python connectormanager.py --debug --connectors=url_connector.URLConnector,other
 
 = The `Connector` interface =
 The `URLConnector` above extends `TimedConnector` in order to use its scheduling scheme. However, the raw `Connector` class can be used to implement a custom scheduling scheme. It also provides a wealth of other methods essential in writing full-featured connectors.
+
+The following is a description of key aspects of `Connector`.
+
+== Identification ==
+All concrete connector implementations must provide a unique `CONNECTOR_TYPE` string field that identifies the particular connector type.
+
+== General ==
+  * `init()`: An initialization method that a connector can implement if needed. This is called when the connector is constructed and whenever its configuration or schedule is changed. Loading such configuration or scheduling parameters should be done here.
+  * `startConnector()`: Called whenever the connector is created or when its configuration or schedule is changed. For example, the connector manager calls the `startConnector` methods of all its stored connectors whenever it starts up. This method must be implemented for the connector to work.
+  * `stopConnector()`: Called when the connector manager shuts down, or right before configuration or scheduling is set. This method must be implemented for the connector to work.
+  * `restartConnectorTraversal()`:
+Note that the connector manager does not give any regard to what happens between `startConnector` and `stopConnector` calls--in other words, it's completely up to the connector to implement its own scheduling scheme. The `TimedConnector` implements an example scheduling scheme; see `timedconnector.py` for details on how to do this.
+  * `getStatus()`: Called when the GSA needs the status of the connector. Should return the status code as a string. The code '0' indicates that the connector is OK.
+
+== Configuration and scheduling ==
+The configuration and scheduling parameters for the connector is specified by the user in the GSA administration console. The following methods are provided to easily access these parameters.
+  * `getConfigParam()`: Reads the connector's configuration and returns the value of a parameter contained within. The name of the configuration parameter is identical to the name of its field in the configuration HTML form.
+  * `getLoad()`: Returns the load setting (documents to traverse per minute).
+  * `getRetryDelay()`: Returns the retry delay in milliseconds. The default value is 300000 milliseconds.
+  * `getTimeIntervals()`: Returns the time intervals over which to traverse. The method returns a string, with individual time intervals delimited by colons.
+
+The `Connector` class provides more lower-level methods for retrieving configuration and scheduling parameters, but the above methods should suffice in most situations. See the `Connector` documentation for more details.
+
+=== Configuration forms ===
+When a user opens the GSA administration page to configure a connector, it is up to the connector to provide its own configuration page as raw HTML text. The following connector methods are called by the connector manager to provide this HTML:
+  * `@classmethod getConfigForm()`: Should return empty configuration form table rows encapsulated inside a `<CmResponse><ConfigureResponse><FormSnippet>` CDATA tag. This method is called before the connector object is ever instantiated.
+  * `getPopulatedConfigForm()`: Like `getConfigForm()`, except with configuration fields already filled in. The rows returned should only be encapsulated inside a CDATA tag.
+
+Writing code to generate HTML for configuration forms can be quite a hassle. Thus, `Connector` provides a configuration form generator that can create this HTML based on a configuration form specification. A connector can take advantage of this feature by providing a `CONNECTOR_CONFIG` field:
+{{{
+class ExampleConnector(connectormanager.Connector):
+  CONNECTOR_TYPE = 'example-connector'
+  CONNECTOR_CONFIG = {
+      'example_field': { 'type': 'text', 'label': 'Example field' }
+  }
+  # no need to implement getConfigForm() and getPopulatedConfigForm().
+
+  # ... remaining code omitted ...
+}}}
+In this configuration specification, there is a single field named `example_field`. When the HTML is generated, a text input tag will be emitted, and a label with the text "Example field" will be placed to its left. After the connector is created, the value of this field can be accessed with `getConfigParam('example_field')`.
+If a connector implementation does choose to use this configuration form generation feature, then it does not need to implement the `getConfigForm()` and `getPopulatedConfigForm()` methods.
+
+== Data storage ==
+`Connector` provides the capability to store data that persists between `stopConnector()` and `startConnector()` calls (for example, this data would persist when the connector manager is completely shut down). This data is stored along with the connector's configuration data within the connector manager configuration. The data can be of any type than can be encoded by Pickle.
+  * `getData()`: Returns the stored data.
+  * `setData()`: Sets the data to be stored upon connector shutdown.
+Note that the data is written to disk only when the connector manager saves its configuration file.
+
+== Sending data to the GSA ==
