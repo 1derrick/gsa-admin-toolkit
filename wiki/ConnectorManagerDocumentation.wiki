@@ -3,14 +3,14 @@
 = Introduction =
 	The Python connector framework provides a simple, quick way to write connectors for the GSA.
 
-= Writing a Connector =
+= Writing a connector =
 == Prerequisites ==
   * Python 2.4
   * [http://cherrypy.org/ CherryPy 3]
 The sample files for this documentation are available in the repository.
 
 == Example ==
-Here is a very simple, intuitive connector that fetches the contents of a URL and then pushes it to the GSA as a content feed:
+Here is a simple connector that fetches the contents of a URL and then pushes it to the GSA as a content feed:
 
 {{{
 import timed_connector
@@ -49,7 +49,9 @@ Now that we have a connector written, it's time to use the connector manager to 
 {{{
 python connectormanager.py --debug --connectors=url_connector.URLConnector
 }}}
-  The `--debug` flag causes the script to print debug information as it executes. The `--connectors` flag lists the connector classes to be loaded by the connector manager. Each class must be specified with its Python package name relative to the location of `connectormanager.py`. In the above example, the `URLConnector` class is located in the file `url_connector.py` in the same directory as `connectormanager.py`.
+  The `--debug` flag causes the script to print debug information as it executes (more specifically, all calls to `log()` from connectors are printed). The `--connectors` flag lists the connector classes to be loaded by the connector manager. Each class must be specified with its Python package name relative to the location of `connectormanager.py`. In the above example, the `URLConnector` class is located in the file `url_connector.py` in the same directory as `connectormanager.py`.
+
+  If desired, the `--use_ssl` flag can be specified to use SSL. The `--port` flag can be used to change the default port, which is 38080.
 
   It's also important to note that multiple connector types can be loaded. To do so, simply separate their names with commas. For example:
 {{{
@@ -79,7 +81,7 @@ Note that the connector manager does not give any regard to what happens between
 
 == Configuration and scheduling ==
 The configuration and scheduling parameters for the connector is specified by the user in the GSA administration console. The following methods are provided to easily access these parameters.
-  * `getConfigParam()`: Reads the connector's configuration and returns the value of a parameter contained within. The name of the configuration parameter is identical to the name of its field in the configuration HTML form.
+  * `getConfigParam(param_name)`: Reads the connector's configuration and returns the value of a parameter contained within. The name of the configuration parameter is identical to the name of its field in the configuration HTML form.
   * `getLoad()`: Returns the load setting (documents to traverse per minute).
   * `getRetryDelay()`: Returns the retry delay in milliseconds. The default value is 300000 milliseconds.
   * `getTimeIntervals()`: Returns the time intervals over which to traverse. The method returns a string, with individual time intervals delimited by colons.
@@ -108,7 +110,10 @@ If a connector implementation does choose to use this configuration form generat
 == Data storage ==
 `Connector` provides the capability to store data that persists between `stopConnector()` and `startConnector()` calls (for example, this data would persist when the connector manager is completely shut down). This data is stored along with the connector's configuration data within the connector manager configuration. The data can be of any type than can be encoded by Pickle.
   * `getData()`: Returns the stored data.
-  * `setData()`: Sets the data to be stored upon connector shutdown.
+  * `setData(data)`: Sets the data to be stored upon connector shutdown.
 Note that the data is written to disk only when the connector manager saves its configuration file.
 
 == Sending data to the GSA ==
+  * `pushToGSA(data, feed_type)`: Pushes a feed to the GSA. The data must be an XML feed string. For information on how to construct feeds, see the [http://code.google.com/apis/searchappliance/documentation/64/feedsguide.html Feeds Protocol Developer's Guide].
+  * `sendContentFeed(**attrs)`: A convenience function that constructs a content feed composed of a single record and sends it to the GSA. Example usage: `sendContentFeed(url='http://...', action='add', mimetype='text/html', content='<some html>')`. The `url`, `mimetype`, and `content` arguments are required.
+  * `sendMultiContentFeed(records, feed_type='incremental')`: A convenience function that constructs a content feed composed of multiple records and sends it to the GSA. The `records` argument should be a list of tuples of the form `(content, metadata)`. Example usage: `sendMultiContentFeed([('<some html>', {'url': url, 'action': 'add', 'mimetype': 'text/html'}])`
