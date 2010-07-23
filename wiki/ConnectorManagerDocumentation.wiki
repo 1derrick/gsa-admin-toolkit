@@ -117,3 +117,6 @@ Note that the data is written to disk only when the connector manager saves its 
   * `pushToGSA(data, feed_type)`: Pushes a feed to the GSA. The data must be an XML feed string. For information on how to construct feeds, see the [http://code.google.com/apis/searchappliance/documentation/64/feedsguide.html Feeds Protocol Developer's Guide].
   * `sendContentFeed(**attrs)`: A convenience function that constructs a content feed composed of a single record and sends it to the GSA. Example usage: `sendContentFeed(url='http://...', action='add', mimetype='text/html', content='<some html>')`. The `url`, `mimetype`, and `content` arguments are required.
   * `sendMultiContentFeed(records, feed_type='incremental')`: A convenience function that constructs a content feed composed of multiple records and sends it to the GSA. The `records` argument should be a list of tuples of the form `(content, metadata)`. Example usage: `sendMultiContentFeed([('<some html>', {'url': url, 'action': 'add', 'mimetype': 'text/html'}])`
+
+== Logging ==
+The `Connector` class provides a method, `logger()`, that returns a Python Logger object designated for the purpose of the calling connector class. See the [http://docs.python.org/library/logging.html#loggers documentation] for the Python logging library for details on how to use this Logger object.
