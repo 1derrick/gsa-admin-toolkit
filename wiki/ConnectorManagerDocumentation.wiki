@@ -1,7 +1,7 @@
 #summary Documentation for the Python connector framework
 
 = Introduction =
-	The Python connector framework provides a simple, quick way to write connectors for the GSA.
+The Python connector framework provides a simple, quick way to write connectors for the GSA.
 
 = Writing a connector =
 == Prerequisites ==
@@ -13,10 +13,10 @@ The sample files for this documentation are available in the repository.
 Here is a simple connector that fetches the contents of a URL and then pushes it to the GSA as a content feed:
 
 {{{
-import timed_connector
+import connector
 import urllib2
 
-class URLConnector(timed_connector.TimedConnector):
+class URLConnector(connector.TimedConnector):
   CONNECTOR_TYPE = 'url-connector'
   CONNECTOR_CONFIG = {
       'url': { 'type': 'text', 'label': 'URL to fetch' },
@@ -63,7 +63,7 @@ python connectormanager.py --debug --connectors=url_connector.URLConnector,other
   * Create a connector instance with the new connector manager, and configure the connector appropriately.
   * Ensure that the URLs that the connector feeds into the GSA match the patterns listed in the admin console in the Crawl URLs page. Otherwise, the GSA will reject the feed provided by the connector.
 
-= The `Connector` interface =
+= The `Connector` abstract class =
 The `URLConnector` above extends `TimedConnector` in order to use its scheduling scheme. However, the raw `Connector` class can be used to implement a custom scheduling scheme. It also provides a wealth of other methods essential in writing full-featured connectors.
 
 The following is a description of key aspects of `Connector`.
@@ -95,7 +95,7 @@ When a user opens the GSA administration page to configure a connector, it is up
 
 Writing code to generate HTML for configuration forms can be quite a hassle. Thus, `Connector` provides a configuration form generator that can create this HTML based on a configuration form specification. A connector can take advantage of this feature by providing a `CONNECTOR_CONFIG` field:
 {{{
-class ExampleConnector(connectormanager.Connector):
+class ExampleConnector(connector.Connector):
   CONNECTOR_TYPE = 'example-connector'
   CONNECTOR_CONFIG = {
       'example_field': { 'type': 'text', 'label': 'Example field' }
