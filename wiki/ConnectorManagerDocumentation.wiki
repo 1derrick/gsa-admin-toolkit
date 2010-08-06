@@ -27,12 +27,16 @@ class URLConnector(connector.TimedConnector):
     self.setInterval(int(self.getConfigParam('delay')))
 
   def run(self):
+    # fetch the contents of the URL
     url = self.getConfigParam('url')
     req = urllib2.Request(url)
     response = urllib2.urlopen(req)
     content = response.read()
-    self.sendContentFeed(url=url, action='add', mimetype='text/html',
-                         content=content)
+
+    # push it to the GSA as a content feed
+    feed = connector.Feed('incremental')
+    feed.addRecord(url=url, action='add', mimetype='text/html', content=content)
+    self.pushFeed(feed)
 }}}
 
 Here are a few things to note about this connector:
@@ -40,7 +44,7 @@ Here are a few things to note about this connector:
   * All connectors must have a unique `CONNECTOR_TYPE` field that identifies the particular type of connector.
   * `The CONNECTOR_CONFIG` dictionary specifies configuration fields for the connector. When the connector's configuration form is brought up in the GSA administration interface, this `CONNECTOR_CONFIG` will be used to construct the form.
   * The `init` method, which is available to all connectors, is called when the connector is created or when its configuration is modified. It's the perfect place to load and process configuration parameters.
-  * The `sendContentFeed` method packages content data in an XML block that the GSA will accept. Here, the `URLConnector` sends the content as HTML to be added to the GSA's index.
+  * The `Feed` class in the `connector` module represents a data feed. Any data placed in the feed with `addRecord` will be converted to an XML representation readable by the GSA when it is sent by the `pushFeed` method. Here, the `URLConnector` sends the content as HTML to be added to the GSA's index.
 
 == Running the connector ==
 Now that we have a connector written, it's time to use the connector manager to expose this connector to the GSA.
@@ -114,32 +118,31 @@ If a connector implementation does choose to use this configuration form generat
 Note that the data is written to disk only when the connector manager saves its configuration file.
 
 == Sending data to the GSA ==
-Connectors must send data to the GSA in the XML feed format, which is fully described in the [http://code.google.com/apis/searchappliance/documentation/64/feedsguide.html Feeds Protocol Developer's Guide]. `Connector` provides a convenience method that constructs a feed record XML string:
-  * `generateFeedRecord(attrs, metadata, content)`: Constructs a feed record. `attrs` is a dictionary of attributes for the record tag, `metadata` is a dictionary of metadata tags to add if needed (can be None), and `content` is a string of content to be added if needed (can be None). For example, this call:
+Connectors must send data to the GSA in the XML feed format, which is fully described in the [http://code.google.com/apis/searchappliance/documentation/64/feedsguide.html Feeds Protocol Developer's Guide]. It's certainly possible for connectors to manually construct this XML, but the `Feed` class provides a simple way to create feeds without directly dealing with any XML. These `Feed`s can be created and manipulated by the following methods:
+  * `__init__(feedtype)`: Creates the feed. `feedtype` is a string that specifies the type of the feed, either `incremental`, `full`, or `metadata-and-url`.
+  * `addRecord(**kwargs)`: Adds a record to the feed. 
+    * Arguments:
+      * `url`, `displayurl`, `mimetype`, etc.: Attributes for the record tag, to be provided as needed (should be strings). The GSA requires the url and metadata arguments to be provided. See [http://code.google.com/apis/searchappliance/documentation/64/feedsguide.html#defining_the_xml] for a full list of record tag attributes.
+      * `metadata`: Optional. Metadata tags to add to the feed, as a dictionary that maps strings to strings.
+      * `content`: Optional; required if the feed is a content feed. Adds a content tag to the record. Should be a string.
+    * Example usage of `addRecord`:
 {{{
-generateFeedRecord(attrs={'url': 'http://mysite.com/index.html', 'action': 'add', 'mimetype': 'text/html'},
-                   metadata={'exampletag1': 'somedata', 'exampletag2': 'moredata'},
-                   content='hello there')
+addRecord(url='http://example.com/index.html', action='add', mimetype='text/html', content='<html>...</html>')
 }}}
-  will return the following XML string (indentation added for clarity):
+    This adds a record to a content feed, with the record element attributes `url`, `action`, and `mimetype`. A `<content>` element is also added. The following XML will be produced by `toXML` for this record:
 {{{
-<record url="http://mysite.com/index.html" action="add" mimetype="text/html">
-  <metadata>
-    <meta name="exampletag1" content="somedata"/>
-    <meta name="exampletag2" content="moredata"/></metadata>
-  <content encoding="base64binary">aGVsbG8gdGhlcmU=\n</content>
+<record url='http://example.com/index.html' action='add' mimetype='text/html'>
+  <content encoding="base64binary">
+    ... the base64-encoded version of the content ...
+  </content>
 </record>
 }}}
-  This XML record is then ready to be sent to the GSA via `pushToGSA`:
-  * `pushToGSA(data, feed_type)`: Pushes a feed to the GSA. The `data` parameter is the XML feed string generated by `generateFeedRecord`. Note that multiple records from `generateFeedRecord` can be concatenated and then sent to the GSA as a batch.
+  * `clear()`: Clears all the records added to the feed.
 
-  The following are more convenience methods that construct XML records and send them to the GSA in single function calls:
-  * `sendContentFeed(content, **attrs)`: Constructs a content feed composed of a single record and sends it to the GSA. Example usage: `sendContentFeed(url='http://...', action='add', mimetype='text/html', content='<some html>')`. The `url`, `mimetype`, and `content` arguments are required.
-  * `sendMultiContentFeed(records, feed_type='incremental')`: Constructs a content feed composed of multiple records and sends it to the GSA. The `records` argument should be a list of tuples of the form `(content, record attributes)`. Example usage: `sendMultiContentFeed([('<some html>', {'url': url, 'action': 'add', 'mimetype': 'text/html'})])`
-  * `sendMetadataAndURLFeed(metadata, **attrs)`: Constructs a metadata-and-url feed composed of a single record and sends it to the GSA. Example usage: `sendMetadataAndURLFeed(url='http://...', action='add', mimetype='text/html', metadata={...})`. Note that the `metadata` can be `None` if no metadata is needed to be added. The `url` and `mimetype` fields, however, are required.
-  * `sendMultiMetadataAndURLFeed(records, feed_type='incremental')`: Constructs a metadata-and-url feed composed of multiple records and sends it to the GSA. The `records` argument should be a list of tuples of the form `(metadata, record attributes)`. Example usage: `sendMultiContentFeed([({'metatag1': 'data1'}, {'url': url, 'action': 'add', 'mimetype': 'text/html'})])`
+Once a feed is constructed and populated with records, it must be sent to the GSA. The following method in `Connector` accomplishes this very task:
+  * `pushFeed(feed)`: Pushes the given `Feed` object to the GSA, and returns the GSA response string.
 
-  While the above convenience methods do cover the most popular use cases, they do have their limitations. For example, it is impossible with the above methods to construct a content feed that includes metadata. For these situations, the `generateFeedRecord` and `pushToGSA` methods should be used instead.
+Both the `Connector` class and the `Feed` class provide additional methods for manipulating and sending feeds, but the most frequently-used are described above. See the documentation for the respective classes for more information about the other methods.
 
 == Logging ==
 The `Connector` class provides a method, `logger()`, that returns a Python Logger object designated for the purpose of the calling connector class. See the [http://docs.python.org/library/logging.html#loggers documentation] for the Python logging library for details on how to use this Logger object.
