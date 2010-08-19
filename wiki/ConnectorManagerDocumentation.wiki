@@ -1,5 +1,7 @@
 #summary Documentation for the Python connector framework
 
+<wiki:toc max_depth="2" />
+
 = Introduction =
 The Python connector framework provides a simple, quick way to write connectors for the GSA. It uses the same underlying protocol as the [http://code.google.com/apis/searchappliance/documentation/connectors/200/connector_dev/cdg_intro.html official Java connector framework]. However, this code is not supported by Google. If there is any change to the underlying protocol, then connectors written using the Python framework will stop working.
 
