@@ -76,19 +76,23 @@ The following is a description of key aspects of `Connector`.
 All concrete connector implementations must provide a unique `CONNECTOR_TYPE` string field that identifies the particular connector type.
 
 == General ==
-  * `init()`: An initialization method that a connector can implement if needed. This is called when the connector is constructed and whenever its configuration or schedule is changed. Loading such configuration or scheduling parameters should be done here.
-  * `startConnector()`: Called whenever the connector is created or when its configuration or schedule is changed. For example, the connector manager calls the `startConnector` methods of all its stored connectors whenever it starts up. This method must be implemented for the connector to work.
-  While both `init` and `startConnector` may seem very similar, as they are both used for connector initialization, they do have a crucial difference in their use: `startConnector` should be implemented by general, abstract connector classes, whereas `init` should be implemented by concrete connector implementations. The abstract class `TimedConnector`, for example, uses the `startConnector` method to start up its scheduling threads, but leaves `init` unimplemented. On the other hand, a concrete connector like `URLConnector`, which extends `TimedConnector`, uses `init` to read configuration data from the GSA administration interface, but inherits `startConnector` from `TimedConnector` to deal with its scheduling.
-  * `stopConnector()`: Called when the connector manager shuts down, or right before configuration or scheduling is set. This method must be implemented for the connector to work.
+  * `init()`: An initialization method that a connector can implement if needed. This is called when the connector is constructed and right after its configuration or schedule is changed. Loading such configuration or scheduling parameters should be done here.
+  * `startConnector()`: Called whenever the connector is created or after its configuration or schedule is changed. For example, the connector manager calls the `startConnector` methods of all its stored connectors whenever it starts up. This method must be implemented for the connector to work.
+
+  While both `init` and `startConnector` may seem very similar, they do have a crucial difference: `init` is called right after the connector is constructed, whereas `startConnector` is called to kick off the connector's traversal. Therefore, `init` should be used to do initialization (like reading configuration values), whereas `startConnector` should be used to define behavior at the beginning of traversals (like starting timing threads). Consider the classes `TimedConnector` and `URLConnector`. `TimedConnector` is an abstract connector that provides a timed scheduling facility, and `URLConnector` is a concrete connector that extends from `TimedConnector. `TimedConnector` implements `startConnector` to spawn scheduling threads, but leaves `init` alone; on the other hand, `URLConnector` uses `init` to read configuration values from the GSA administration console, but leaves `startConnector` alone to be inherited from `TimedConnector`.
+
+  It's guaranteed that `init` will be called before `startConnector`.
+
+  * `stopConnector()`: Called when the connector manager shuts down, or right before configuration or scheduling is set. Should be used to stop the connector's traversal--`TimedConnector`, for example, uses this to kill its child threads. This method must be implemented for the connector to work.
   * `restartConnectorTraversal()`:
-Note that the connector manager does not give any regard to what happens between `startConnector` and `stopConnector` calls--in other words, it's completely up to the connector to implement its own scheduling scheme. The `TimedConnector` implements an example scheduling scheme; see `timedconnector.py` for details on how to do this.
+Note that the connector manager does not give any regard to what happens between `startConnector` and `stopConnector` calls--in other words, it's completely up to the connector to implement its own scheduling scheme. The `TimedConnector` implements an example scheduling scheme; see `connector.py` for details on how to do this.
   * `getStatus()`: Called when the GSA needs the status of the connector. Should return the status code as a string. The code '0' indicates that the connector is OK.
 
 == Configuration and scheduling ==
-The configuration and scheduling parameters for the connector is specified by the user in the GSA administration console. The following methods are provided to easily access these parameters.
+The configuration and scheduling parameters for the connector are specified by the user in the GSA administration console. The following methods are provided to easily access these parameters.
   * `getConfigParam(param_name)`: Reads the connector's configuration and returns the value of a parameter contained within. The name of the configuration parameter is identical to the name of its field in the configuration HTML form.
   * `getLoad()`: Returns the load setting (documents to traverse per minute).
-  * `getRetryDelay()`: Returns the retry delay in milliseconds. The default value is 300000 milliseconds.
+  * `getRetryDelay()`: Returns the retry delay in milliseconds. The retry delay is the time that the connector should wait after it finishes traversal and before it starts a new traversal. The default value is 300000 milliseconds.
   * `getTimeIntervals()`: Returns the time intervals over which to traverse. The method returns a string, with individual time intervals delimited by colons.
 
 The `Connector` class provides more lower-level methods for retrieving configuration and scheduling parameters, but the above methods should suffice in most situations. See the `Connector` documentation for more details.
@@ -113,13 +117,13 @@ In this configuration specification, there is a single field named `example_fiel
 If a connector implementation does choose to use this configuration form generation feature, then it does not need to implement the `getConfigForm()` and `getPopulatedConfigForm()` methods.
 
 == Data storage ==
-`Connector` provides the capability to store data that persists between `stopConnector()` and `startConnector()` calls (for example, this data would persist when the connector manager is completely shut down). This data is stored along with the connector's configuration data within the connector manager configuration. The data can be of any type than can be encoded by Pickle.
+`Connector` provides the capability to store data that persists between `stopConnector()` and `startConnector()` calls (for example, this data would persist when the connector manager is completely shut down). This data is stored locally along with the connector's configuration data within the connector manager configuration file. The data can be of any type than can be encoded by Pickle.
   * `getData()`: Returns the stored data.
   * `setData(data)`: Sets the data to be stored upon connector shutdown.
 Note that the data is written to disk only when the connector manager saves its configuration file.
 
 == Sending data to the GSA ==
-Connectors must send data to the GSA in the XML feed format, which is fully described in the [http://code.google.com/apis/searchappliance/documentation/64/feedsguide.html Feeds Protocol Developer's Guide]. It's certainly possible for connectors to manually construct this XML, but the `Feed` class provides a simple way to create feeds without directly dealing with any XML. These `Feed`s can be created and manipulated by the following methods:
+Connectors must send data to the GSA in the XML feed format, which is fully described in the [http://code.google.com/apis/searchappliance/documentation/64/feedsguide.html Feeds Protocol Developer's Guide]. It's possible for connectors to manually construct this XML, but the `Feed` class provides a simple way to create feeds without directly dealing with any XML. These `Feed`s can be created and manipulated by the following methods:
   * `__init__(feedtype)`: Creates the feed. `feedtype` is a string that specifies the type of the feed, either `incremental`, `full`, or `metadata-and-url`.
   * `addRecord(**kwargs)`: Adds a record to the feed. 
     * Arguments:
