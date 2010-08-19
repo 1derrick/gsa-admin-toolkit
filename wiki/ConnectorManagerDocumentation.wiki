@@ -151,3 +151,13 @@ Both the `Connector` class and the `Feed` class provide additional methods for m
 
 == Logging ==
 The `Connector` class provides a method, `logger()`, that returns a Python Logger object designated for the purpose of the calling connector class. See the [http://docs.python.org/library/logging.html#loggers documentation] for the Python logging library for details on how to use this Logger object.
+
+= Provided connectors =
+The following are some connectors provided in the repository:
+  * `TimedConnector`: An abstract connector that runs continually with a specified time interval. A connector that implements this `TimedConnector` just needs to override the `run` method. The `getInterval` and `setInterval` methods are provided to manipulate the timer delay (the default is 15 minutes).
+  If a TimedConnector implementation's interval comes from the configuration form, then `setInterval` should be called in an `init` method with the appropriate value from `getConfigParam`.
+  For more information, see the documentation inside `connector.py`.
+  * `ExampleConnector`: A bare-bones connector that does absolutely nothing. It serves as a template for writing new connectors.
+  * `SitemapConnector`: A connector that crawls a site given a `sitemap.xml` file. It extends `TimedConnector` to use its scheduling facilities.
+  * `URLConnector`: A connector that crawls a single URL, which is specified in the connector's configuration form in the admin interface. The contents of the URL are pushed to the GSA as a content feed. This connector extends `TimedConnector`.
+  * `SMBConnector`: A connector that crawls a public SMB share. It uses [http://gsa-admin-toolkit.googlecode.com/svn/trunk/smbcrawler.py smbcrawler] to fetch a list of files in the share, and then invokes `smbclient` to download each file locally and then pushes each file to the GSA as a content feed. This connector extends `TimedConnector`.
